@@ -1,0 +1,109 @@
+var
+MainForm:TCLForm;
+ProPanelMain,ProPanelTask:TClProLabel;
+HeadLabel:TClProLabel;
+scrollBox:TclVertScrollBox;
+Qry: TClSQLiteQuery;
+i:Integer;
+void DatabaseConnection;
+var
+  password, DB: String;
+  UForm: TclForm;
+  Qry: TClSQLiteQuery;
+  TableExists: Boolean;
+{
+  try
+    Clomosy.DBSQLiteConnect(Clomosy.AppFilesPath + 'ToDoList.db3', '');
+
+    Clomosy.DBSQLiteQuery.Sql.Text = 'SELECT name FROM sqlite_master WHERE type="table" AND name="Task"';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    
+    TableExists = not Clomosy.DBSQLiteQuery.Eof;
+    
+    if not (TableExists)
+    {
+      Clomosy.DBSQLiteQuery.Sql.Text = 
+      'CREATE TABLE Task (
+    id INTEGER NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    explanation TEXT NOT NULL,
+    status INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(id AUTOINCREMENT))';
+      Clomosy.DBSQLiteQuery.OpenOrExecute;
+
+    }
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+}
+}
+void TaskList;
+{
+  DatabaseConnection;
+  try
+  
+    Qry = Clomosy.DBSQLiteQueryWith('SELECT 
+    id ,
+    name ,
+    explanation,
+    status
+    FROM Task');
+    Qry.OpenOrExecute;
+    
+     if (Qry.Found)
+    {
+      for i = 0 to Qry.RecordCount-1
+      {
+      ProPanelTask=MainForm.AddNewProPanel(scrollBox,'ProPanelTask'+IntToStr(i));
+      ProPanelTask.Height=50;
+      ProPanelTask.Width=MainForm.clWidth;
+      ProPanelTask.Align=alTop;
+      ProPanelTask.Margins.Top=MainForm.clHeight/100;
+      ProPanelTask.Margins.Bottom=MainForm.clHeight/100;
+      ProPanelTask.clProSettings.IsFill = True; 
+      ProPanelTask.clProSettings.IsRound = True;
+      ProPanelTask.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#ffcccc');
+      ProPanelTask.SetclProSettings(ProPanelTask.clProSettings);
+      }
+    }
+
+   
+  except
+
+    ShowMessage('Exception class: '+LastExceptionClassName+' Exception Message: ' + LastExceptionMessage);
+}
+}
+{
+  MainForm = TclForm.Create(Self);
+   
+  ProPanelMain=MainForm.AddNewProPanel(MainForm,'ProPanelMain');
+  ProPanelMain.Height=MainForm.clHeight;
+  ProPanelMain.Width=MainForm.clWidth;
+  ProPanelMain.Align=alClient;
+  ProPanelMain.clProSettings.IsFill = True; 
+  ProPanelMain.clProSettings.IsRound = True;
+  ProPanelMain.SetclProSettings(ProPanelMain.clProSettings);
+  
+  HeadLabel = MainForm.AddNewProLabel(ProPanelMain, 'HeadLabel', '~To Do List~');
+  HeadLabel.Align=alMostTop;
+  HeadLabel.Margins.Top=MainForm.clHeight/50;
+  HeadLabel.clProSettings.FontVertAlign = palcenter;
+  HeadLabel.clProSettings.FontHorzAlign = palcenter;
+  HeadLabel.clProSettings.FontSize = 20;
+  HeadLabel.clProSettings.TextSettings.Font.Style = [fsBold,fsItalic];
+  HeadLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#db0000');
+  HeadLabel.SetclProSettings(HeadLabel.clProSettings);
+  
+  scrollBox = MainForm.AddNewVertScrollBox(ProPanelMain,'scrollBox');
+  scrollBox.Align = alClient;
+  scrollBox.Height = MainForm.clHeight;
+  scrollBox.Margins.Left = 10;
+  scrollBox.Margins.Right = 10;
+  scrollBox.Margins.Top = 10;
+  scrollBox.ShowScrollBars = True;
+  
+  TaskList;
+  
+  MainForm.Run;
+}
