@@ -1,14 +1,15 @@
 var
 MainForm:TCLForm;
-ProPanelMain,ProPanelTask:TClProLabel;
-HeadLabel:TClProLabel;
+ProPanelMain,ProPanelTask:TClProPanel;
+HeadLabel nameLabel,idLabel,explanationLabel,timeLabel:TClProLabel;
 scrollBox:TclVertScrollBox;
 Qry: TClSQLiteQuery;
 i:Integer;
+statusCheck:TclCheckBox;
+leftLayout ,rightLayout: TclLayout;
 void DatabaseConnection;
 var
   password, DB: String;
-  UForm: TclForm;
   Qry: TClSQLiteQuery;
   TableExists: Boolean;
 {
@@ -63,16 +64,110 @@ void TaskList;
       ProPanelTask.Margins.Bottom=MainForm.clHeight/100;
       ProPanelTask.clProSettings.IsFill = True; 
       ProPanelTask.clProSettings.IsRound = True;
-      ProPanelTask.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#ffcccc');
+      ProPanelTask.clProSettings.BorderColor = clAlphaColor.clHexToColor('#d1d1d1');
+      ProPanelTask.clProSettings.BorderWidth = 3;
       ProPanelTask.SetclProSettings(ProPanelTask.clProSettings);
+      
+      idLabel=MainForm.AddNewProLabel(ProPanelTask, 'idLabel'+IntToStr(i),'');
+      idLabel.Align=alClient;
+      idLabel.Margins.Top = 5;
+      idLabel.Visible = False;
+      idLabel.Text=Qry.FieldByName('id').AsString;
+      
+      leftLayout= MainForm.AddNewLayout(ProPanelTask,'leftLayout'+IntToStr(i));
+      leftLayout.Align=alLeft;
+      leftLayout.Margins.Left=10;
+      
+      nameLabel=MainForm.AddNewProLabel(leftLayout, 'nameLabel'+IntToStr(i),'');
+      nameLabel.Align=alTop;
+      nameLabel.Margins.Top= 4;
+      nameLabel.Text=Qry.FieldByName('name').AsString;
+      nameLabel.clProSettings.FontSize = 15;
+      nameLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+      nameLabel.SetclProSettings(nameLabel.clProSettings);
+      
+      explanationLabel=MainForm.AddNewProLabel(leftLayout, 'explanationLabel'+IntToStr(i),'');
+      explanationLabel.Align=alBottom;
+      explanationLabel.Margins.Bottom=2;
+      explanationLabel.Margins.Right=10;
+      explanationLabel.Text=Qry.FieldByName('explanation').AsString;
+      explanationLabel.clProSettings.FontSize = 12;
+      explanationLabel.clProSettings.TextSettings.Font.Style = [fsItalic];
+      explanationLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#787878');
+      explanationLabel.SetclProSettings(explanationLabel.clProSettings);
+      
+      rightLayout= MainForm.AddNewLayout(ProPanelTask,'rightLayout'+IntToStr(i));
+      rightLayout.Align=alRight;
+      rightLayout.Margins.Left=MainForm.clWidth/2;
+      
+      statusCheck=MainForm.AddNewCheckBox(rightLayout, 'statusCheck'+IntToStr(i), '');
+      statusCheck.Align=alMostRight;
+      statusCheck.Margins.Left=MainForm.clWidth/3;
+      
+      clComponent.SetupComponent(statusCheck,'{"Caption":"statusCheck'+IntToStr(i)+'"}');
+      statusCheck.Hint = Qry.FieldByName('id').AsString;
+      MainForm.AddNewEvent(statusCheck,tbeOnClick,'UpdateStatus');
+      if (Qry.FieldByName('status').AsString=='1')
+      {
+        statusCheck.isChecked=True;
+      }
+      else{
+        statusCheck.isChecked=False;
+      }
+      /*timeLabel=MainForm.AddNewProLabel(rightLayout, 'timeLabel'+IntToStr(i),'');
+      timeLabel.Align=alMostLeft;
+      timeLabel.Margins.Bottom=2;
+      timeLabel.Margins.Right=10;
+      timeLabel.Text='3 hours ago';
+      timeLabel.clProSettings.FontSize = 12;
+      timeLabel.clProSettings.TextSettings.Font.Style = [fsItalic];
+      timeLabel.clProSettings.FontColor = clAlphaColor.clHexToColor('#787878');
+      timeLabel.SetclProSettings(timeLabel.clProSettings);*/
+
+      Qry.Next;
+      }
+    }
+  except
+    ShowMessage('Exception class: '+LastExceptionClassName+' Exception Message: ' + LastExceptionMessage);
+  }
+}
+void UpdateStatus;
+var
+stt:TclCheckBox;
+{
+
+DatabaseConnection;
+stt=TclCheckBox(MainForm.clSender);
+  try
+  Qry = Clomosy.DBSQLiteQueryWith('SELECT * from Task WHERE 
+      id='+QuotedStr(stt.Hint)+'
+  ');
+    Qry.OpenOrExecute;
+    if (Qry.Found)
+    {
+      if(Qry.FieldByName('status').AsString=='0')
+      {
+        Clomosy.DBSQLiteQuery.Sql.Text = '
+      UPDATE Task SET 
+      status='+IntToStr(1)+'
+      WHERE id='+QuotedStr(stt.Hint)+'';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+      }
+      else
+      {
+        Clomosy.DBSQLiteQuery.Sql.Text = '
+      UPDATE Task SET 
+      status='+IntToStr(0)+'
+      WHERE id='+QuotedStr(stt.Hint)+'';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
       }
     }
 
-   
+    
   except
-
-    ShowMessage('Exception class: '+LastExceptionClassName+' Exception Message: ' + LastExceptionMessage);
-}
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+    }
+  
 }
 {
   MainForm = TclForm.Create(Self);
