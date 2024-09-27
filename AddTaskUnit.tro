@@ -1,0 +1,105 @@
+var 
+BForm: TclStyleForm;
+btnSaveTask:TClProButton;
+addName:TclProEdit;
+addExplanation:TclProEdit;
+ProPanel1 : TclProPanel;
+addNameLabel,addExplanationLabel,taskHeadLabel:TClProLabel;
+
+void InsertTask;
+{
+  try
+    Clomosy.DBSQLiteQuery.Sql.Text = '
+      INSERT INTO Task (name, explanation, status) 
+      VALUES('+QuotedStr(addName.Text)+', 
+      '+QuotedStr(addExplanation.Text)+', 
+      '+IntToStr(0)+')';
+    Clomosy.DBSQLiteQuery.OpenOrExecute;
+    ShowMessage('Duty succesfully added!');
+    Clomosy.RunUnit('TaskListUnit');
+    BForm.clHide;
+  except
+    ShowMessage('Exception Class: '+LastExceptionClassName+' Exception Message: '+LastExceptionMessage);
+  }
+  
+}
+{
+  BForm=TclStyleForm.Create(Self);
+  BForm.clSetStyle(BForm.LightSB);
+  ProPanel1=BForm.AddNewProPanel(BForm,'ProPanel1');
+  ProPanel1.Align=alClient;
+  ProPanel1.Height =Bform.clHeight;
+  ProPanel1.Width =Bform.clWidth;
+  ProPanel1.clProSettings.IsFill = True; 
+  ProPanel1.clProSettings.IsRound = True;
+  ProPanel1.SetclProSettings(ProPanel1.clProSettings);
+  
+  taskHeadLabel = BForm.AddNewProLabel(ProPanel1, 'taskHeadLabel', 'Task Add');
+  taskHeadLabel.Align=alTop;
+  taskHeadLabel.Margins.Top=BForm.clHeight/30;
+  taskHeadLabel.clProSettings.FontVertAlign = palcenter;
+  taskHeadLabel.clProSettings.FontHorzAlign = palcenter;
+  taskHeadLabel.clProSettings.FontSize = 17;
+  taskHeadLabel.clProSettings.TextSettings.Font.Style = [fsBold];
+  taskHeadLabel.SetclProSettings(taskHeadLabel.clProSettings);
+  
+  addNameLabel = BForm.AddNewProLabel(ProPanel1, 'addNameLabel', 'Task Name ');
+  addNameLabel.margins.Top=Bform.clHeight/20;
+  addNameLabel.margins.Left=12;
+  addNameLabel.clProSettings.FontSize =15;
+  addNameLabel.Align=alTop;
+  addNameLabel.clProSettings.TextSettings.Font.Style = [fsItalic];
+  addNameLabel.SetclProSettings(addNameLabel.clProSettings);
+  
+  addName=Bform.AddNewProEdit(ProPanel1,'addName', 'Please enter the Task name : ');
+  addName.Align=alTop;
+  addName.margins.Top=Bform.clHeight/60;
+  addName.Margins.Right=BForm.clWidth/40;
+  addName.Margins.Left=BForm.clWidth/40;
+  addName.Height=45;
+  addName.clProSettings.BorderColor  = clAlphaColor.clHexToColor('#d1d1d1');
+  addName.clProSettings.RoundHeight = 15;
+  addName.clProSettings.RoundWidth = 15;
+  addName.clProSettings.BorderWidth = 3;
+  addName.SetclProSettings(addName.clProSettings);
+  
+  addExplanationLabel = BForm.AddNewProLabel(ProPanel1, 'addExplanationLabel', 'Task Address ');
+  addExplanationLabel.margins.Top=Bform.clHeight/20;
+  addExplanationLabel.margins.Left=12;
+  addExplanationLabel.Align=alTop;
+  addExplanationLabel.clProSettings.FontSize =15;
+  addExplanationLabel.clProSettings.TextSettings.Font.Style = [fsItalic];
+  addExplanationLabel.SetclProSettings(addExplanationLabel.clProSettings);
+  
+  addExplanation=Bform.AddNewProEdit(ProPanel1,'addExplanation', 'Please enter the Task address : ');
+  addExplanation.Align=alTop;
+  addExplanation.margins.Top=Bform.clHeight/60;
+  addExplanation.Margins.Right=BForm.clWidth/40;
+  addExplanation.Margins.Left=BForm.clWidth/40;
+  addExplanation.Height=45;
+  addExplanation.clProSettings.BorderColor  = clAlphaColor.clHexToColor('#d1d1d1');
+  addExplanation.clProSettings.RoundHeight = 15;
+  addExplanation.clProSettings.RoundWidth = 15;
+  addExplanation.clProSettings.BorderWidth = 3;
+  addExplanation.SetclProSettings(addExplanation.clProSettings);
+  
+  btnSaveTask=Bform.AddNewProButton(ProPanel1,'btnSaveTask', 'Save Task');
+  btnSaveTask.Align=alTop;
+  btnSaveTask.margins.Top=Bform.clHeight/30;
+  btnSaveTask.Margins.Right=Bform.clWidth/40;
+  btnSaveTask.Margins.Left=Bform.clWidth/40;
+  btnSaveTask.clProSettings.BackgroundColor = clAlphaColor.clHexToColor('#ebe6e6');
+  btnSaveTask.clProSettings.BorderColor  = clAlphaColor.clHexToColor('#d1d1d1');
+  btnSaveTask.clProSettings.RoundHeight = 15;
+  btnSaveTask.clProSettings.RoundWidth = 15;
+  btnSaveTask.clProSettings.BorderWidth = 3;
+  btnSaveTask.clProSettings.FontSize = 17;
+  btnSaveTask.clProSettings.TextSettings.Font.Style = [fsItalic,fsBold];
+  btnSaveTask.SetclProSettings(btnSaveTask.clProSettings);
+ 
+  
+  Bform.AddNewEvent(btnSaveTask,tbeOnClick,'InsertTask');
+  Bform.Run;
+  
+  
+}
